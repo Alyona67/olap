@@ -1,7 +1,6 @@
 """
 Генератор учебных данных для домена "Розница".
-Создаёт 9 таблиц в data/raw/.
-Чеки: 2000 чеков, в каждом 1–5 позиций.
+Создаёт 9 таблиц в data/raw/. (Большой объём для реалистичных графиков)
 """
 import pandas as pd
 import random
@@ -11,11 +10,14 @@ random.seed(42)
 
 # ============ ИЗМЕРЕНИЯ ============
 
-# --- dim_product: 50 товаров ---
-categories = ["Молочка", "Хлеб", "Напитки", "Бакалея", "Мясо", "Овощи", "Фрукты", "Заморозка"]
-brands = ["LocalFarm", "BakerCo", "JuiceBar", "Aqua", "SweetDay", "TeaHouse", "MeatPro", "VeggieLand"]
+# --- dim_product: 1500 товаров ---
+categories = ["Молочка", "Хлеб", "Напитки", "Бакалея", "Мясо", "Овощи", "Фрукты", "Заморозка", "Бытовая химия", "Гигиена"]
+brands = [
+    "LocalFarm", "BakerCo", "JuiceBar", "Aqua", "SweetDay", "TeaHouse", "MeatPro", "VeggieLand", "FoodMaster", 
+    "FreshLine", "EcoProduct", "DailyFood", "MilkWay", "BreadHouse", "WaterLife", "CleanHome", "CarePlus"
+]
 products = []
-for i in range(1, 51):
+for i in range(1, 1501):                           # 1500 товаров
     products.append({
         "product_id": 100 + i,
         "product_name": f"Товар {i}",
@@ -25,11 +27,11 @@ for i in range(1, 51):
 pd.DataFrame(products).to_csv("data/raw/dim_product.csv", index=False)
 print(f"dim_product.csv     — {len(products)} строк")
 
-# --- dim_store: 15 магазинов ---
-cities = ["Гродно", "Минск", "Брест", "Гомель", "Витебск", "Могилёв"]
-regions = ["Запад", "Центр", "Восток"]
+# --- dim_store: 25 магазинов ---
+cities = ["Гродно", "Минск", "Брест", "Гомель", "Витебск", "Могилёв", "Барановичи", "Бобруйск"]
+regions = ["Запад", "Центр", "Восток", "Юг"]
 stores = []
-for i in range(1, 16):
+for i in range(1, 26):
     stores.append({
         "store_id": i,
         "store_name": f"Магазин {i}",
@@ -57,11 +59,12 @@ for i in range(365):
 pd.DataFrame(dates).to_csv("data/raw/dim_date.csv", index=False)
 print(f"dim_date.csv        — {len(dates)} строк")
 
-# --- dim_customer: 100 клиентов ---
+# --- dim_customer: 50000 клиентов ---
+print("Генерация 50 000 клиентов...")
 segments = ["Новый", "Постоянный", "VIP"]
 genders = ["М", "Ж"]
 customers = []
-for i in range(1, 101):
+for i in range(1, 50001):
     customers.append({
         "customer_id": i,
         "customer_name": f"Клиент {i}",
@@ -72,44 +75,47 @@ for i in range(1, 101):
 pd.DataFrame(customers).to_csv("data/raw/dim_customer.csv", index=False)
 print(f"dim_customer.csv    — {len(customers)} строк")
 
-# --- dim_employee: 30 сотрудников ---
+# --- dim_employee: 100 сотрудников ---
 positions = ["Продавец", "Кассир", "Менеджер", "Старший смены"]
 employees = []
-for i in range(1, 31):
+for i in range(1, 101):
     employees.append({
         "employee_id": i,
         "employee_name": f"Сотрудник {i}",
         "position": random.choice(positions),
-        "store_id": random.randint(1, 15),
+        "store_id": random.randint(1, 25),
     })
 pd.DataFrame(employees).to_csv("data/raw/dim_employee.csv", index=False)
 print(f"dim_employee.csv    — {len(employees)} строк")
 
-# --- dim_promotion: 10 акций ---
-promo_types = ["Скидка 10%", "Скидка 20%", "2 по цене 1", "Подарок"]
+# --- dim_promotion: 20 акций ---
+promo_types = ["Скидка 10%", "Скидка 20%", "2 по цене 1", "Подарок", "Скидка 50%"]
 promotions = []
-for i in range(1, 11):
+for i in range(1, 21):
     promotions.append({
         "promotion_id": i,
         "promotion_name": f"Акция {i}",
         "promo_type": random.choice(promo_types),
-        "discount_pct": random.choice([10, 15, 20, 30]),
+        "discount_pct": random.choice([10, 15, 20, 30, 50]),
     })
 pd.DataFrame(promotions).to_csv("data/raw/dim_promotion.csv", index=False)
 print(f"dim_promotion.csv   — {len(promotions)} строк")
 
 # ============ ФАКТЫ ============
 
-# --- fact_sales: 2000 чеков, в каждом 1–5 позиций ---
+# --- fact_sales: 500000 чеков ---
+print("Генерация 500 000 чеков... (займёт около 20-30 секунд)")
 sales = []
 sale_id = 1
-for _ in range(2000):                              # 2000 чеков
+
+for _ in range(500000):                            # 500 000 чеков!
     n_items = random.randint(1, 5)                 # 1–5 товаров в чеке
-    customer = random.randint(1, 100)
-    store = random.randint(1, 15)
+    customer = random.randint(1, 50000)            # случайный клиент
+    store = random.randint(1, 25)
     date_ = random.choice(dates)["date_id"]
-    employee = random.randint(1, 30)
-    promo = random.choice([None] + list(range(1, 11)))
+    employee = random.randint(1, 100)
+    promo = random.choice([None] * 3 + list(range(1, 21))) # ~25% чеков со скидкой
+    
     for _ in range(n_items):
         qty = random.randint(1, 10)
         price = round(random.uniform(3, 100), 2)
@@ -117,7 +123,8 @@ for _ in range(2000):                              # 2000 чеков
             "sale_id": sale_id,
             "date_id": date_,
             "store_id": store,
-            "product_id": random.randint(101, 150),
+            # Теперь выбираем из 1500 товаров (ID от 101 до 1600)
+            "product_id": random.randint(101, 1600), 
             "customer_id": customer,
             "employee_id": employee,
             "promotion_id": promo,
@@ -129,9 +136,9 @@ for _ in range(2000):                              # 2000 чеков
 pd.DataFrame(sales).to_csv("data/raw/fact_sales.csv", index=False)
 print(f"fact_sales.csv      — {len(sales)} строк ({sale_id - 1} чеков)")
 
-# --- fact_returns: 300 возвратов ---
+# --- fact_returns: 50000 возвратов ---
 returns = []
-for i in range(1, 301):
+for i in range(1, 50001):                           # 50 000 возвратов
     sale = random.choice(sales)
     returns.append({
         "return_id": i,
@@ -147,19 +154,24 @@ pd.DataFrame(returns).to_csv("data/raw/fact_returns.csv", index=False)
 print(f"fact_returns.csv    — {len(returns)} строк")
 
 # --- fact_inventory: остатки на складе ---
+print("Генерация остатков на складе...")
 inventory = []
 inv_id = 1
-for store_id in range(1, 16):
-    for product_id in range(101, 151):
-        if random.random() < 0.7:
-            inventory.append({
-                "inventory_id": inv_id,
-                "date_id": random.choice(dates)["date_id"],
-                "store_id": store_id,
-                "product_id": product_id,
-                "qty_on_hand": random.randint(0, 200),
-            })
-            inv_id += 1
+sample_dates = random.sample(dates, 30)            # 30 контрольных дней в году
+for store_id in range(1, 26):
+    # Теперь проверяем наличие 1500 товаров
+    for product_id in range(101, 1601):
+        if random.random() < 0.9:                  # 90% товаров есть на складе
+            for d in sample_dates:
+                inventory.append({
+                    "inventory_id": inv_id,
+                    "date_id": d["date_id"],
+                    "store_id": store_id,
+                    "product_id": product_id,
+                    "qty_on_hand": random.randint(0, 300),
+                })
+                inv_id += 1
+                
 pd.DataFrame(inventory).to_csv("data/raw/fact_inventory.csv", index=False)
 print(f"fact_inventory.csv  — {len(inventory)} строк")
 

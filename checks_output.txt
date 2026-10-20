@@ -2,15 +2,15 @@
 
  Проверка 1 
     table_name  rows_count
-   dim_product          50
-     dim_store          15
+   dim_product        1500
+     dim_store          25
       dim_date         365
-  dim_customer         100
-  dim_employee          30
- dim_promotion          10
-    fact_sales        5989
-  fact_returns         300
-fact_inventory         528
+  dim_customer       50000
+  dim_employee         100
+ dim_promotion          20
+    fact_sales     1499786
+  fact_returns       50000
+fact_inventory     1013040
 
  Проверка 2 
      check_name  bad_rows
@@ -29,8 +29,4 @@ NULL product_id         0
 
  Проверка 4 
  total_revenue  total_rows  total_checks  avg_check
-    1713407.05        5989          2000      856.7
-
- Проверка 5 
-                              check_name  bad_rows
-fact_sales.product_id not in dim_product         0
+  424911063.95     1499786        500000     849.82
