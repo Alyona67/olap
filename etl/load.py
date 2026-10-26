@@ -35,7 +35,6 @@ def run_etl():
         con.execute(f"DROP TABLE IF EXISTS {t}")
     log("      Таблицы удалены (если были).")
 
-    # 2. СОЗДАНИЕ И ЗАГРУЗКА СПРАВОЧНИКОВ
     log("\n[2/4] Загрузка справочников...")
     con.execute("""
         CREATE TABLE dim_product (product_id INTEGER PRIMARY KEY, product_name VARCHAR, category VARCHAR, brand VARCHAR);

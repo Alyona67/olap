@@ -1,3 +1,4 @@
+-- 1. Как меняется выручка по месяцам?
 SELECT 
     d.year,
     d.month,
@@ -10,6 +11,7 @@ GROUP BY d.year, d.month, d.month_name
 ORDER BY d.year, d.month;
 
 
+-- 2. Какие категории товаров и бренды дают наибольшую выручку? 
 SELECT 
     p.category,
     p.brand,
@@ -22,16 +24,17 @@ QUALIFY brand_rank_in_category = 1
 ORDER BY revenue DESC;
 
 
+-- 3. Продаются ли товары со скидкой чаще, чем без неё?
 SELECT 
     CASE 
         WHEN f.promotion_id IS NULL THEN 'Без акции' 
         ELSE 'С акцией' 
     END AS promo_flag,
-    COUNT(DISTINCT f.sale_id) AS total_checks,
-    SUM(f.amount) AS revenue,
-    ROUND(SUM(f.amount) / COUNT(DISTINCT f.sale_id), 2) AS avg_check,
-    ROUND(COUNT(DISTINCT f.sale_id) * 100.0 / SUM(COUNT(DISTINCT f.sale_id)) OVER (), 2) AS checks_share_pct,
-    ROUND(SUM(f.amount) * 100.0 / SUM(SUM(f.amount)) OVER (), 2) AS revenue_share_pct
+    COUNT(*) AS total_items,              
+    SUM(f.qty) AS total_units,             
+    ROUND(SUM(f.amount), 2) AS revenue,             
+    ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) AS items_share_pct,     
+    ROUND(SUM(f.amount) * 100.0 / SUM(SUM(f.amount)) OVER (), 2) AS revenue_share_pct 
 FROM read_csv_auto('data/raw/fact_sales.csv') f
 GROUP BY promo_flag;
 
@@ -40,3 +43,5 @@ SELECT
     COUNT(*) AS total_rows,
     COUNT(DISTINCT sale_id) AS total_checks
 FROM read_csv_auto('data/raw/fact_sales.csv');
+
+
