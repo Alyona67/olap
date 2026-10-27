@@ -9,7 +9,7 @@ count = result[0][0]
 total_amount = result[0][1]
 
 print("-" * 40)
-print("Сверка ClickHouse И DUCKuckDB")
+print("Сверка ClickHouse И DuckDB")
 print("-" * 40)
 print(f"Количество строк: {count}")
 print(f"Общая выручка:    {total_amount}")
