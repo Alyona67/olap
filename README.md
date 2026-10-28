@@ -42,10 +42,10 @@ curl http://localhost:8123/ping
 
 | Файл | Поля | Строк | Описание |
 |------|------|-------|----------|
-| `dim_product.csv` | `product_id, product_name, category, brand` | 50 | Товары |
-| `dim_store.csv` | `store_id, store_name, city, region` | 15 | Магазины |
+| `dim_product.csv` | `product_id, product_name, category, brand` | 1500 | Товары |
+| `dim_store.csv` | `store_id, store_name, city, region` | 25 | Магазины |
 | `dim_date.csv` | `date_id, full_date, year, month, month_name, day_of_week` | 365 | Календарь на 2024 |
-| `dim_customer.csv` | `customer_id, customer_name, city, segment, gender` | 100 | Клиенты |
+| `dim_customer.csv` | `customer_id, customer_name, city, segment, gender` | 50000 | Клиенты |
 | `dim_employee.csv` | `employee_id, employee_name, position, store_id` | 30 | Сотрудники |
 | `dim_promotion.csv` | `promotion_id, promotion_name, promo_type, discount_pct` | 10 | Акции |
 
@@ -53,7 +53,7 @@ curl http://localhost:8123/ping
 
 | Файл | Поля | Строк | Описание |
 |------|------|-------|----------|
-| `fact_sales.csv` | `sale_id, date_id, store_id, product_id, customer_id, employee_id, promotion_id, qty, amount` | 5000 | Продажи |
+| `fact_sales.csv` | `sale_id, date_id, store_id, product_id, customer_id, employee_id, promotion_id, qty, amount` | 1 500 881 | Продажи |
 | `fact_returns.csv` | `return_id, sale_id, date_id, store_id, product_id, qty, amount, reason` | 300 | Возвраты |
 | `fact_inventory.csv` | `inventory_id, date_id, store_id, product_id, qty_on_hand` | 532 | Остатки на складе |
 
@@ -169,3 +169,24 @@ python run_checks.py
 
 4. Как пересчитать сводку после повторной загрузки:
 Сводная таблица sales_summary полностью очищается (TRUNCATE TABLE) и заполняется заново скриптом build_summary.py (команда INSERT INTO ... SELECT из fact_sales).
+
+
+## Дашборд Metabase (лаба 10)
+Собран дашборд в Metabase (источник данных — ClickHouse). 
+Он включает в себя 5 виджетов:
+1. Выручка по дням.
+2. Выручка по месяцам.
+3. Выручка по магазинам.
+4. Товары по акции и без (доля акций).
+5. Топ категорий и брендов.
+Добавлен фильтр по регионам (выпадающий список «Запад», «Центр», «Восток»). SQL-коды всех виджетов сохранены в папке `dashboards/`.
+
+## Сверка SQL (лаба 11)
+Эталонный SQL-запрос из `sql/canonical_metric.sql` выдает число **424 909 823.89**.
+Карточка «Главная метрика» на дашборде в Metabase показывает **424.9M** (то же самое число, округленное интерфейсом до миллионов). 
+Расхождений нет, числа совпадают.
+
+## Устный путь данных 
+Исходный файл (9 CSV в `data/raw/`) → скрипт `etl/load.py` (проверяет на NULL, дубли и загружает в `retail.duckdb`) → скрипт `load_clickhouse.py` (переносит данные в серверную базу ClickHouse) → скрипт `build_summary.py` (создает быструю сводку `sales_summary`) → эталонный SQL-запрос из `canonical_metric.sql` (считает главную метрику) → карточка и графики на дашборде в Metabase (с теми же фильтрами).
+Одна строка факта `fact_sales` = одна позиция в чеке.
+Главная мера = выручка (`SUM(amount)`).
